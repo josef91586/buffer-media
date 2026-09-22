@@ -1,0 +1,27 @@
+name: Decode buffer media
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  decode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode media binaries
+        run: |
+          set -euo pipefail
+          base64 -d staging/dream-hands-storm-caption.jpg.b64 > dream-hands-storm-caption.jpg
+          base64 -d staging/dream-hands-storm-15s.mp4.b64 > dream-hands-storm-15s.mp4
+          echo "JPG bytes=$(wc -c < dream-hands-storm-caption.jpg)"
+          echo "MP4 bytes=$(wc -c < dream-hands-storm-15s.mp4)"
+          xxd -l 8 dream-hands-storm-caption.jpg
+          xxd -l 16 dream-hands-storm-15s.mp4
+      - name: Commit binaries
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dream-hands-storm-caption.jpg dream-hands-storm-15s.mp4
+          git commit -m "Add dream media binaries for Buffer" || echo "nothing to commit"
+          git push
